@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>商品管理</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+<link rel="stylesheet" href="../../css/main.css">
+<link rel="stylesheet" href="../../ueditor/themes/default/css/ueditor.css">
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+<script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+<script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+<script src="../../js/common.js"></script>
+<script type="text/javascript" charset="gbk">
+      window.UEDITOR_HOME_URL = "../../ueditor/";//编辑器项目路径
+</script>
+<script type="text/javascript" src="../../ueditor/ueditor.config.js"></script>
+<script type="text/javascript" src="../../ueditor/ueditor.all.js"></script>
+</head>
+<body>
+
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+		<!--  	<div class="form-group col-sm-2">
+			 	<div class="col-sm-10">
+				<select class="form-control"  v-model="q.address" @keyup.enter="query"  >
+	           	<option  value="" selected="selected">全部</option>
+	         
+				  <option :value="option.value"  v-for="option in  addresses">
+           			 {{ option.value }}
+       				 </option>		 		
+				</select>
+				  </div>
+			</div>
+			-->
+			
+			<div class="form-group col-sm-2">
+			 	<div class="col-sm-10">
+				<select class="form-control"  v-model="q.orderState" @keyup.enter="query"  >
+	     				<option  value="" selected="selected">全部</option>
+	     			<option :value="option"  v-for="option in  orderState">
+           			 {{ option}}
+       				 </option>		 		
+				</select>
+				  </div>
+			</div>
+			
+			
+			
+			
+			
+			<a class="btn btn-default" @click="query">查询</a>
+			<!--  <a  class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a> -->
+			<!-- <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a> -->
+			<!-- <a  class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a> -->
+	
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+    
+    
+    
+
+
+
+
+            
+
+
+
+    
+     <div v-show="show" class="panel panel-default">
+   <form class="form-horizontal" id="orderForm">
+
+	<div class="form-group">
+				<div class="col-sm-2 control-label">订单状态:</div> <br>
+			<input  type="hidden"	 name="id"  class="form-control" v-model="orderO.id" ><br>
+	<!-- 	 <input  type="hidden" name="orConsignee"  class="form-control" v-model="order.orConsignee" >
+				 <input type="hidden" name="orderPhone"  class="form-control" v-model="orderO.orderPhone" >
+				 <input type="hidden" name="orderTime"  class="form-control" v-model="orderO.orderTime" >
+				  <input type="hidden" name="userId"  class="form-control" v-model="orderO.userId" >
+				  -->
+				
+				<div style="margin-left: 100px">
+				<label class="radio-inline">
+				  <input type="radio" name="orderState" value="1" v-model="order.orderState"/>未付款
+				</label><br> 
+				<label class="radio-inline">
+				  <input type="radio" name="orderState" value="2" v-model="order.orderState"/>已付款待提货
+				</label><br> 
+				<label class="radio-inline">
+				  <input type="radio" name="orderState" value="3" v-model="orderO.orderState"/> 已提货
+				</label><br>
+				<label class="radio-inline">
+				  <input type="radio" name="orderState" value="4" v-model="orderO.orderState"/> 退货
+				</label><br>
+				<label class="radio-inline">
+				  <input type="radio" name="orderState" value="5" v-model="orderO.orderState"/> 订单取消
+				</label><br>
+				<label class="radio-inline">
+				  <input type="radio" name="orderState" value="6" v-model="orderO.orderState"/> 其它
+				</label>
+				</div>
+			</div> 	
+			<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+	 </form>
+  </div>
+    
+    
+    
+    
+    
+    
+   <div v-show="showListNo" class="panel panel-default">
+   <form class="form-horizontal">
+ <div style="margin-left: 30px"><h3>商品详情：</h3></div>  
+   <table   style="margin-left: 70px ">
+	<tr>
+	<th width="300">商品名称</th>
+	<th width="300">商品价格</th>
+	<th width="300">下单数量</th>
+	<th width="300">库存数量</th>
+	</tr>
+
+  		 <template v-for="item in goods"  v-if="goods !=null" > 
+  			
+  					<tr>
+					<td style="padding-left:10px">{{item.goodsName}}</td> 
+					<td style="padding-left:15px">{{item.goodsPrice}}元</td>
+					<td style="padding-left:25px">{{item.count}}</td> 
+					<td style="padding-left:25px">{{item.counts}}</td>
+					 </tr>
+					 
+		 </template>
+ 
+ </table>
+   
+   
+   
+   <div style="margin-left: 30px"><h3>订单详情：</h3></div>
+     <div class="form-group">
+			   	<div class="col-sm-2 control-label">订单号:</div>
+			   	<div class="col-sm-10">
+			   		<span class="form-control" style="border: hidden; box-shadow:none;">{{order.orderNumber}}</span>
+			   	</div>			      
+			</div>
+   
+  <div class="form-group">
+			   	<div class="col-sm-2 control-label">收货人:</div>
+			   	<div class="col-sm-10">
+			   		<span class="form-control" style="border: hidden; box-shadow:none;">{{order.orConsignee}}</span>
+			   	</div>			      
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">电话:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{order.orderPhone}}</span>
+			    </div>
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">属地:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{order.address}}</span>
+			    </div>
+			</div>
+			
+			
+				<div class="form-group">
+			   	<div class="col-sm-2 control-label">下单时间:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{order.orderTime}}</span>
+			    </div>
+			</div>	
+			
+			
+			
+			
+				
+	<!-- 		<div class="form-group">
+			   	<div class="col-sm-2 control-label">订单状态:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.orderState}}</span>
+			    </div>
+			</div>
+			
+			
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品名称:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.goodsName}}</span>
+			    </div>
+			</div>
+			
+				
+						<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品价格:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.goodsPrice}}</span>
+			    </div>
+			</div>
+			
+			
+				<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品描述:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.goodsIntroduce}}</span>
+			    </div>
+			</div>
+		
+		<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品开始销售时间</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.goodsSaleStarttime}}</span>
+			    </div>
+			</div>	
+		<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品结束销售时间</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.goodsSaleEndtime}}</span>
+			    </div>
+			</div>	
+		
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">属地:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.address}}</span>
+			    </div>
+			</div>
+			
+				<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品类型:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.type}}</span>
+			    </div>
+			</div>
+		
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">下单数量:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.count}}</span>
+			    </div>
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">剩余数量:</div>
+			   	<div class="col-sm-10">
+			       <span class="form-control" style="border: hidden; box-shadow:none;">{{orderGoodsO.counts}}</span>
+			    </div>
+			</div>
+		-->
+			<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+			<!-- 	<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/> -->
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+	 </form>
+  </div> 
+  
+  
+</div> 
+<script src="../../js/modules/market/order.js"></script>
+</body>
+</html>

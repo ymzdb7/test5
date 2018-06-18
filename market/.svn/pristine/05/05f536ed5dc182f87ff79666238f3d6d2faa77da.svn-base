@@ -1,0 +1,65 @@
+package com.winhands.modules.market.service.Impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.winhands.modules.market.dao.GoodsDao;
+import com.winhands.modules.market.dao.OrderDao;
+import com.winhands.modules.market.entity.GoodsEntity;
+import com.winhands.modules.market.entity.OrderEntity;
+import com.winhands.modules.market.service.GoodsService;
+import com.winhands.modules.market.service.OrderService;
+
+/**
+ * 订单管理
+ */
+@Service("OrderService")
+public class OrderServiceImpl implements OrderService {
+	@Autowired
+	private OrderDao orderDao;
+
+	@Override
+	public List<OrderEntity> queryList(Map<String, Object> map) {
+		return orderDao.queryList(map);
+	}
+
+	@Override
+	public int queryTotal(Map<String, Object> map) {
+		return orderDao.queryTotal();
+	}
+
+	@Override
+	public void save(OrderEntity orders) {
+		orderDao.save(orders);
+	}
+
+	@Override
+	public void update(OrderEntity orders) {
+		orderDao.update(orders);
+	}
+
+	@Override
+	public void deleteBatch(Long[] ids) {
+		orderDao.deleteBatch(ids);
+	}
+
+	@Override
+	public OrderEntity queryObject(Long id) {
+		return orderDao.queryObject(id);
+	}
+
+	@Override
+	public List<OrderEntity> querySelList(Map<String, Object> map) {
+		return orderDao.querySelList(map);
+	}
+
+	@Override
+	public int querySelTotal(Map<String, Object> map) {
+		return orderDao.querySelTotal(map);
+	}
+
+	
+}

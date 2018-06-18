@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.winhands.modules.market.dao.GoodsDao">
+	
+	<select id="queryObject" resultType="com.winhands.modules.market.entity.GoodsEntity">
+		select * from tb_goods where id = #{id}
+	</select>
+	
+	
+	<select id="queryList" resultType="com.winhands.modules.market.entity.GoodsEntity">
+		select * ,0 as isRecom from tb_goods
+		<where>
+			<if test="goodsName != null and goodsName.trim() != ''">
+				and `goods_name` like concat('%',#{goodsName},'%') 
+			</if>
+		</where>
+		
+		order by id 
+		desc 
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+	<select id="queryTotal" resultType="int">
+		select count(*) from tb_goods
+	</select>
+	
+	
+	
+	
+	
+	<insert id="save" parameterType="com.winhands.modules.market.entity.GoodsEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_goods
+		(
+			
+			`goods_name`, 
+			`goods_price`,
+			`goods_introduce`,
+			`goods_pic_name`, 
+			`goods_pic_path`, 
+			`goods_status`, 
+			`goods_sale_starttime`,
+			`goods_sale_endtime`,
+			`goods_url`
+		)
+		values
+		(
+			#{goodsName}, 
+			#{goodsPrice},
+			#{goodsIntroduce},
+			#{goodsPicName}, 
+			#{goodsPicPath}, 
+			#{goodsStatus}, 
+			#{goodsSaleStarttime1},
+			#{goodsSaleEndtime1},
+			#{goodsUrl}
+		)
+	</insert>
+	
+	
+	
+	
+	
+	<delete id="deleteBatch">
+		delete from tb_goods where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	
+		<update id="update" parameterType="com.winhands.modules.market.entity.GoodsEntity">
+		update tb_goods 
+		<set> 
+			<if test="goodsName != null">`goods_name` = #{goodsName}, </if>
+			<if test="goodsPrice != null">`goods_price` = #{goodsPrice}, </if>
+			<if test="goodsIntroduce != null">`goods_introduce` = #{goodsIntroduce}, </if>
+			
+			<if test="goodsSaleStarttime != null">`goods_sale_starttime` = #{goodsSaleStarttime}, </if>
+			<if test="goodsSaleEndtime != null">`goods_sale_endtime` = #{goodsSaleEndtime}, </if>
+			
+			<if test="goodsPicPath != null">`goods_pic_path` = #{goodsPicPath}, </if>
+			<if test="goodsPicName != null">`goods_pic_name` = #{goodsPicName}, </if>
+			<if test="goodsStatus != null">`goods_status` = #{goodsStatus}, </if>
+			<if test="goodsUrl != null">`goods_url` = #{goodsUrl}, </if>
+		</set>
+		where id = #{id} 
+	</update>
+	
+	
+	
+	
+	
+
+</mapper>

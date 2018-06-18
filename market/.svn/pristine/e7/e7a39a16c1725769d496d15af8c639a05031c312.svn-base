@@ -1,0 +1,140 @@
+package com.winhands.modules.market.service.Impl;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Map;
+
+import javax.transaction.Transactional;
+
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+
+import com.winhands.modules.market.dao.GoodsDao;
+import com.winhands.modules.market.dao.OrderDao;
+import com.winhands.modules.market.dao.OrderGoodsDao;
+import com.winhands.modules.market.entity.GoodsEntity;
+import com.winhands.modules.market.entity.OrderEntity;
+import com.winhands.modules.market.entity.OrderGoodsEntity;
+import com.winhands.modules.market.service.GoodsService;
+import com.winhands.modules.market.service.OrderService;
+import com.winhands.modules.sys.entity.SysUserEntity;
+
+/**
+ * 订单管理
+ */
+@Service("OrderService")
+public class OrderServiceImpl implements OrderService {
+	@Autowired
+	private OrderDao orderDao;
+	@Autowired
+	private GoodsDao goodsDao;
+	@Autowired
+	private OrderGoodsDao orderGoodsDao;
+	
+	@Override
+	public List<OrderEntity> queryList(Map<String, Object> map) {
+		return orderDao.queryList(map);
+	}
+
+	@Override
+	public int queryTotal(Map<String, Object> map) {
+		return orderDao.queryTotal(map);
+	}
+
+	@Override
+	public void save(OrderEntity orders) {
+		orderDao.save(orders);
+	}
+	
+	//订单保存用事务
+	@Override
+	@Transactional
+	public void saveOo(Long[] ids,Long[] counts,String[] goodsPrice,SysUserEntity user,String  uuid,int id) {
+	
+		OrderEntity order=new OrderEntity();
+		order.setUserId(new Long(user.getUserId()).intValue());
+		order.setOrConsignee(user.getUsername());
+		order.setOrderPhone(user.getMobile());
+		order.setOrderNumber(uuid);
+		String dd=user.getAddress();
+		order.setAddress(user.getAddress());
+		order.setOrderState("1");
+		order.setOrderTime(Timestamp.valueOf(DateTime.now().toString("yyyy-MM-dd HH:mm:ss")));
+		orderDao.save(order);
+		OrderGoodsEntity orderGoods=new OrderGoodsEntity();
+		OrderEntity order1=orderDao.queryNew();
+		 id=order1.getId();
+		for (int i = 0; i < ids.length; i++) {
+			GoodsEntity goods=goodsDao.queryObject(ids[i]);
+			orderGoods.setGoodsId(new Long(ids[i]).intValue());
+			orderGoods.setCount(new Long(counts[i]).intValue());
+			orderGoods.setOrderId(id);
+			orderGoodsDao.save(orderGoods);
+			int cc=goods.getCounts()-new Long(counts[i]).intValue();
+			goods.setCounts(cc);
+			goodsDao.updateO(goods);
+			}
+	
+	}
+	
+
+	@Override
+	public void update(OrderEntity orders) {
+		orderDao.update(orders);
+	}
+
+	@Override
+	public void deleteBatch(Long[] ids) {
+		orderDao.deleteBatch(ids);
+	}
+
+	@Override
+	public OrderEntity queryObject(Long id) {
+		return orderDao.queryObject(id);
+	}
+
+	@Override
+	public List<OrderEntity> querySelList(Map<String, Object> map) {
+		return orderDao.querySelList(map);
+	}
+
+	@Override
+	public int querySelTotal(Map<String, Object> map) {
+		return orderDao.querySelTotal(map);
+	}
+
+	@Override
+	public Map<String, Object> getObject(int id) {
+		// TODO Auto-generated method stub
+		return orderDao.getObject(id);
+	}
+
+	@Override
+	@Transactional
+	public OrderEntity queryObjectW(Object id) {
+		// TODO Auto-generated method stub
+		return orderDao.queryObjectW(id);
+	}
+
+	@Override
+	public OrderEntity queryObjectMa(Map<String, Object> map) {
+		// TODO Auto-generated method stub
+		return orderDao.queryObjectMa(map);
+	}
+
+	@Override
+	public OrderEntity queryNew() {
+		// TODO Auto-generated method stub
+		return orderDao.queryNew();
+	}
+
+	@Override
+	public void delete(Long id) {
+		// TODO Auto-generated method stub
+		orderDao.delete(id);
+	}
+
+
+}

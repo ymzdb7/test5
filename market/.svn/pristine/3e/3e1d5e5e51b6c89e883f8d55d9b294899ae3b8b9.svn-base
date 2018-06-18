@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>管理</title>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<link rel="stylesheet" href="../../css/bootstrap.min.css">
+<link rel="stylesheet" href="../../css/font-awesome.min.css">
+<link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+<link rel="stylesheet" href="../../css/main.css">
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../libs/bootstrap.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+<script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+<script src="../../js/common.js"></script>
+
+</head>
+<body>
+
+<div id="rrapp" v-cloak>
+	<div v-show="showList">
+		<div class="grid-btn">
+			<div class="form-group col-sm-2">
+				<input type="text" class="form-control" v-model="q.goodsName" @keyup.enter="query" placeholder="商品名">
+			</div>
+			<a class="btn btn-default" @click="query">查询</a>
+			 <a  class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			<a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			<a  class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			<!-- <a  class="btn btn-primary" @click="evaluate"><i class="fa fa-trash-o"></i>&nbsp;评价管理</a> -->
+		</div>
+	    <table id="jqGrid"></table>
+	    <div id="jqGridPager"></div>
+    </div>
+      <div v-show="showListNo" class="panel panel-default">
+		<div class="panel-heading">{{title}}</div>
+		<form class="form-horizontal" id="goodsForm" method="post" enctype="multipart/form-data">
+			 <div class="form-group">
+			   	<div class="col-sm-2 control-label">商品名</div>
+			   	<div class="col-sm-10">
+			   	  <input type="hidden" name="id"  class="form-control" v-model="goods.id" >
+			      <input type="text" name="goodsName"  class="form-control" v-model="goods.goodsName" placeholder="商品名"/>
+			    </div>
+			</div>
+			
+			  <div v-show="show1" style="border:none">
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品类型</div>
+			   	<div class="col-sm-10">
+			   	<select class="form-control" name="typeId1" v-model="goods.typeId1">
+	        		 <option :value="option.typeId" v-for="option in  type">  {{ option.typeName }} </option>		 
+       			</select>
+			    </div>
+			</div> 
+			 </div>
+			 
+			   <div v-show="show2" style="border:none">
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品类型</div>
+			   	<div class="col-sm-10">
+			   	<select class="form-control" name="typeName" v-model="goods.typeName">
+	        		 <option :value="option.typeName" v-for="option in  type">  {{ option.typeName }} </option>		 
+       			</select>
+			    </div>
+			</div> 
+			 </div>
+			
+			 
+			 
+			 
+			 
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品价格</div>
+			   	<div class="col-sm-10">
+			   		<input type="text" name="goodsPrice1"  class="form-control" v-model="goods.goodsPrice1" placeholder="商品价格"/>
+			    </div>
+			</div>
+		
+			
+				 
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">计量单位</div>
+			   	 	<div class="col-sm-10">
+			   	
+			   	   	 <input style="width: auto;display: inline-block;" type="text" name="priceCounts"  class="form-control" v-model="goods.priceCounts" placeholder="数量"/>
+		
+			   	   	<select  style="width: 100px;display: inline-block;"   class="form-control" name="calculateName" v-model="goods.calculateName"  >
+	       			 <option :value="option.calculateName"  v-for="option in  calculate">
+           			 {{option.calculateName}}
+       				 </option>		 		
+				</select>
+			   	
+			
+			
+				
+			</div>
+			</div>
+			
+			
+		<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品描述</div>
+			   	<div class="col-sm-10">
+			   		<input  id="mytext" value="" type="text" name="goodsIntroduce"  class="form-control" v-model="goods.goodsIntroduce" placeholder="商品描述,最多可输入10个字"/>
+			    </div>
+			</div>
+			
+			
+		<div class="form-group">
+			   	<div class="col-sm-2 control-label">图片</div>
+			   	<div class="col-sm-10" >
+			  
+			   	<input type="file" name="pic"  placeholder="图片"/>
+			   	<div id="addImg"></div>
+			    </div>
+			</div>
+			
+		<!-- 	<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品开始销售时间</div>
+			   	<div class="col-sm-10">
+			      <input type="datetime-local"  name="goodsSaleStarttime1" class="form-control" v-model="goods.goodsSaleStarttime1" placeholder="商品开始销售时间"/>
+			    </div>
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">商品结束销售时间</div>
+			   	<div class="col-sm-10">
+			      <input type="datetime-local" name="goodsSaleEndtime1"   class="form-control" v-model="goods.goodsSaleEndtime1" placeholder="商品结束销售时间"/>
+			    </div>
+			</div> -->
+		
+		
+		
+		
+			<div class="form-group">
+				<div class="col-sm-2 control-label">商品状态</div> 
+				<label class="radio-inline">
+				  <input type="radio" name="goodsStatus" value="1" v-model="goods.goodsStatus"/>商品下架
+				</label>
+				<label class="radio-inline">
+				  <input type="radio" name="goodsStatus" value="2" v-model="goods.goodsStatus"/>商品上架
+				</label>
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">属地</div>
+			   	<div class="col-sm-10">
+			   	<select class="form-control" name="address" v-model="goods.address">
+	        		 <option :value="option.value" v-for="option in  addresses">  {{ option.value }} </option>		 
+       			</select>
+			    </div>
+			</div>
+			
+			<div class="form-group">
+			   	<div class="col-sm-2 control-label">库存数量</div>
+			   	<div class="col-sm-10">
+			   		<input type="text" name="counts"  class="form-control" v-model="goods.counts" placeholder="库存数量"/>
+			    </div>
+			</div>
+			
+			
+			<div class="form-group">
+				<div class="col-sm-2 control-label"></div> 
+				<input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+				&nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+			</div>
+		</form>
+	</div> 
+</div> 
+<script src="../../js/modules/mar/gosod.js"></script>
+</body>
+</html>

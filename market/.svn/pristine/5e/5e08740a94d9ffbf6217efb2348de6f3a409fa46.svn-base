@@ -1,0 +1,199 @@
+package com.winhands.modules.market.entity;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
+import org.hibernate.validator.constraints.NotBlank;
+
+import com.winhands.common.validator.group.AddGroup;
+import com.winhands.common.validator.group.UpdateGroup;
+
+public class GoodsEntity implements Serializable{
+	
+	/**
+	 * 商品管理
+	 */
+	private static final long serialVersionUID = 1L;
+	private Integer id;//商品id
+	
+	@NotBlank(message="商品名不能为空", groups = {AddGroup.class, UpdateGroup.class})
+	private String goodsName;//商品名称
+	
+	/*@NotBlank(message="商品价格不能为空", groups = {AddGroup.class, UpdateGroup.class})*/
+	private BigDecimal goodsPrice;//商品价格
+	private String goodsPrice1;
+	
+
+	private String goodsIntroduce;//商品描述
+	private String goodsPicName;//商品文件名
+	private String goodsPicPath;//图片路径
+	private Integer goodsStatus;//1商品下架2商品上架
+	private String goodsSaleStarttime1;
+	private Timestamp goodsSaleStarttime;//商品开始销售时间
+	private String goodsSaleEndtime1;
+	private Timestamp goodsSaleEndtime;//商品结束销售时间
+	private String goodsUrl;//链接商品详情页面
+	private Integer userId;
+	private String address;
+	private int typeId;
+	private String typeId1;
+	private String typeName;
+	private String calculateName;
+	private String priceCounts;
+	
+	
+
+	public String getPriceCounts() {
+		return priceCounts;
+	}
+	public void setPriceCounts(String priceCounts) {
+		this.priceCounts = priceCounts;
+	}
+	public String getGoodsPrice1() {
+		return goodsPrice1;
+	}
+	public void setGoodsPrice1(String goodsPrice1) {
+		this.goodsPrice1 = goodsPrice1;
+	}
+	public String getCalculateName() {
+		return calculateName;
+	}
+	public void setCalculateName(String calculateName) {
+		this.calculateName = calculateName;
+	}
+	public String getTypeName() {
+		return typeName;
+	}
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
+	}
+	public int getTypeId() {
+		return typeId;
+	}
+	public void setTypeId(int typeId) {
+		this.typeId = typeId;
+	}
+	public String getTypeId1() {
+		return typeId1;
+	}
+	public void setTypeId1(String typeId1) {
+		this.typeId1 = typeId1;
+	}
+	private int counts;//库存
+	private int count;//下单数量
+	
+	
+	public int getCount() {
+		return count;
+	}
+	public void setCount(int count) {
+		this.count = count;
+	}
+	public int getCounts() {
+		return counts;
+	}
+	public void setCounts(int counts) {
+		this.counts = counts;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public String getGoodsSaleStarttime1() {
+		return goodsSaleStarttime1;
+	}
+	public void setGoodsSaleStarttime1(String goodsSaleStarttime1) {
+		this.goodsSaleStarttime1 = goodsSaleStarttime1;
+	}
+	public String getGoodsSaleEndtime1() {
+		return goodsSaleEndtime1;
+	}
+	public void setGoodsSaleEndtime1(String goodsSaleEndtime1) {
+		this.goodsSaleEndtime1 = goodsSaleEndtime1;
+	}
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getGoodsName() {
+		return goodsName;
+	}
+	public void setGoodsName(String goodsName) {
+		this.goodsName = goodsName;
+	}
+	
+	public BigDecimal getGoodsPrice() {
+		return goodsPrice;
+	}
+	public void setGoodsPrice(BigDecimal goodsPrice) {
+		this.goodsPrice = goodsPrice;
+	}
+	
+	public String getGoodsIntroduce() {
+		return goodsIntroduce;
+	}
+	public void setGoodsIntroduce(String goodsIntroduce) {
+		this.goodsIntroduce = goodsIntroduce;
+	}
+	
+	
+	public String getGoodsPicName() {
+		return goodsPicName;
+	}
+	public void setGoodsPicName(String goodsPicName) {
+		this.goodsPicName = goodsPicName;
+	}
+	public String getGoodsPicPath() {
+		return goodsPicPath;
+	}
+	public void setGoodsPicPath(String goodsPicPath) {
+		this.goodsPicPath = goodsPicPath;
+	}
+	public Integer getGoodsStatus() {
+		return goodsStatus;
+	}
+	public void setGoodsStatus(Integer goodsStatus) {
+		this.goodsStatus = goodsStatus;
+	}
+
+
+
+
+	public Timestamp getGoodsSaleStarttime() {
+		return goodsSaleStarttime;
+	}
+
+	public void setGoodsSaleStarttime(Timestamp goodsSaleStarttime) {
+		this.goodsSaleStarttime = goodsSaleStarttime;
+	}
+	public Timestamp getGoodsSaleEndtime() {
+		return goodsSaleEndtime;
+	}
+	public void setGoodsSaleEndtime(Timestamp goodsSaleEndtime) {
+		this.goodsSaleEndtime = goodsSaleEndtime;
+	}
+	public String getGoodsUrl() {
+		return goodsUrl;
+	}
+	public void setGoodsUrl(String goodsUrl) {
+		this.goodsUrl = goodsUrl;
+	}
+	
+	
+	public Integer getUserId() {
+		return userId;
+	}
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
+
+
+
+	
+}

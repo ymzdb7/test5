@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.winhands.modules.market.dao.TypeDao">
+<select id="queryObject" resultType="com.winhands.modules.market.entity.TypeEntity">
+		select * from tb_type where type_id = #{typeId}
+	</select>
+	<select id="queryList" resultType="com.winhands.modules.market.entity.TypeEntity">
+		select * from tb_type 
+		<where>
+			<if test="typeName != null and typeName.trim() != ''">
+				and `type_name` like concat('%',#{typeName},'%') 
+			</if>
+		</where>
+		order by type_id desc 
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	<select id="queryTotal" resultType="int">
+		select count(*) from tb_type
+	</select>
+	
+		<delete id="deleteBatch">
+		delete from tb_type where type_id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<insert id="save" parameterType="com.winhands.modules.market.entity.TypeEntity" >
+		insert into tb_type
+		(
+			
+			`type_name`
+		)
+		values
+		(
+			#{typeName}
+		)
+	</insert>
+	
+<update id="update" parameterType="com.winhands.modules.market.entity.TypeEntity">
+		update tb_type 
+		<set> 
+			<if test="typeName != null">`type_name` = #{typeName}, </if>
+		</set>
+		where type_id =#{typeId}
+	</update>
+	
+</mapper>

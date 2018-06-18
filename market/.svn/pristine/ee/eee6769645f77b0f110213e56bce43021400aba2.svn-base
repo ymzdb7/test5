@@ -1,0 +1,244 @@
+var content;
+var curWwwPath=window.document.location.href;
+var pathName=window.document.location.pathname;
+var pos=curWwwPath.indexOf(pathName);
+var localhostPath=curWwwPath.substring(0,pos);
+$(document).ready(function () {
+	getAddress();
+	
+    $("#jqGrid").jqGrid({
+        url: baseURL + 'market/order/list',
+        datatype: "json",
+        colModel: [			
+			{ label: 'id', name: 'id', width: 20, key: true},
+			{ label: '订单收货人', name: 'orConsignee', width: 30 }, 
+			{ label: '电话', name: 'orderPhone', width: 50 }, 
+			{ label: '下单时间', name: 'orderTime', width: 50 }, 
+			{ label: '属地', name: 'address', width: 50 }, 
+			{ label: '订单号', name: 'orderNumber', width: 50 }, 
+			
+			{ label: '订单状态', name: 'orderState', width: 50,formatter:function(value,options,row){
+				if(value==1){
+					
+					return '<span>未付款</span>'
+				}
+				if(value==2){
+					
+					return '<span>已付款待提货</span>'
+				}
+				if(value==3){
+					
+					return '<span>已提货</span>'
+				}
+				
+				
+				if(value==4){
+					
+					return '<span>退货</span>'
+				}
+				if(value==5){
+					
+					return '<span>订单取消</span>'
+				}
+				if(value==6){
+					
+					return '<span>其它</span>'
+				}
+				
+				
+			}},
+			{ label: '详情', name: 'id', width: 30, formatter: function(value, options, row){
+				var detail="<input type='button' value='查看'  onclick='btn_detail(\""+ value + "\")'>";
+                return detail;
+			}},
+			{ label: '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;操&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;作', name: 'id', width: 60, formatter: function(value, options, row){
+				var detail="<input type='button' value='已提货'  onclick='btn_detail2(\""+ value + "\")'>";
+				var detail1="<input type='button' value='取消订单'  onclick='btn_detail3(\""+ value + "\")'>";
+                return detail+"&nbsp;&nbsp;"+detail1;
+			}}
+		
+			],
+		viewrecords: true,
+        height: 385,
+        rowNum: 10,
+		rowList : [10,30,50],
+        rownumbers: true, 
+        rownumWidth: 25, 
+        autowidth:true,
+        multiselect: true,
+        pager: "#jqGridPager",
+        jsonReader : {
+            root: "page.list",
+            page: "page.currPage",
+            total: "page.totalPage",
+            records: "page.totalCount"
+        },
+        prmNames : {
+            page:"page", 
+            rows:"limit", 
+            order: "order"
+        },
+        gridComplete:function(){
+        	//隐藏grid底部滚动条
+        	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" }); 
+        }
+    });
+ 
+});
+
+
+var vm = new Vue({
+	el:'#rrapp',
+	data:{
+		q:{
+			address: null
+			
+		},
+		order:{},
+		orderO:{},
+		goods:{},
+		/*orderGoodsO:{},*/
+		showList: true,
+		showListNo: false,
+		show:false,
+		title:null,
+		addresses:{}
+},
+	methods: {
+		query: function () {
+			vm.reload();
+		},
+		
+	del: function () {
+			var ids = getSelectedRows();
+			if(ids == null){
+				return ;
+			}
+			var boo=confirm('确定要删除选中的记录？');
+			if(boo==true){
+			/*confirm('确定要删除选中的记录？', function(){*/
+				$.ajax({
+					type: "POST",
+				    url: baseURL + "market/order/delete",
+                    contentType: "application/json",
+				    data: JSON.stringify(ids),
+				    success: function(r){
+						if(r.code == 0){
+							alert('操作成功');
+                                vm.reload();
+							
+						}else{
+							alert(r.msg);
+						}
+					}
+				});
+			/*});*/}
+		},
+		
+		update: function () {
+		var id = getSelectedRow();
+			  console.log("id>>:"+id);
+			if(id == null){
+				return ;
+			}
+			
+            $.get(baseURL + "market/order/info/"+id, function(r){
+            	 console.log("info_id>>:"+id);
+                vm.showList = false;
+                vm.showListNo = false;
+                vm.show = true;
+                vm.title = "修改";
+                console.log("------order:",r.order);
+                vm.orderO = r.order;
+            });
+		},	
+		
+		saveOrUpdate: function () {
+       /*     if(vm.validator()){
+                return ;
+            }*/
+          
+			var url = vm.orderO.id == null ? "market/order/save" : "market/order/update";
+			var form = new FormData(document.getElementById("orderForm"));
+			$.ajax({
+				type: "POST",
+			    url: baseURL + url,
+			    data:form,
+			    contentType: false,
+			    processData:false,
+			    success: function(r){
+			    	if(r.code === 0){
+						alert('操作成功');
+							vm.reload();
+						
+					}else{
+						alert(r.msg);
+					}
+				}
+			});
+		},
+		
+		reload: function (event) {
+			vm.showList = true;
+			vm.show=false;
+			vm.showListNo=false;
+			var page = $("#jqGrid").jqGrid('getGridParam','page');
+			$("#jqGrid").jqGrid('setGridParam',{ 
+				postData:{'address': vm.q.address},
+				
+                page:page
+            }).trigger("reloadGrid");
+			console.log(">>>>贵贵哥"+vm.q.address)
+		}
+		
+	/*	validator: function () {
+		  if(isBlank(vm.goods.goodsName)){
+	                alert("商品名不能为空");
+	                return true;
+	       }
+        }*/
+	}
+});
+
+
+function btn_detail(id){	
+	console.log("-------贵贵哥id="+id);
+	$.get(baseURL +"market/order/detail?id="+id,function(r){
+		
+		if(r.goods!=null){
+		vm.showList=false;
+		vm.showListNo=true;
+		/*	vm.show=false;*/
+		/*vm.orderGoodsO=r.details;*/
+	
+		vm.goods=r.goods;
+	
+		vm.order=r.order;
+		console.log("------r.goods"+r.goods);
+		}
+	});
+/*	$.get(baseURL +"station/sys/list",function(r){
+		vm.userList=r.userList;
+	});*/
+}
+
+
+function getAddress(){
+	$.ajax({
+		type: "GET",
+	    url: "http://211.149.174.103:8080/wash/notice/address/list",
+	    dataType:'jsonp',  
+        jsonp:"callback",
+        data:{"token":localStorage.getItem("token")},
+	    success: function(r){
+	    	if(r.code === 0){
+	    		vm.addresses= r.addressList;
+			}else{
+				alert(r.msg);
+			}
+		}
+	});
+	/*getLoginAddress();*/
+}
+
+

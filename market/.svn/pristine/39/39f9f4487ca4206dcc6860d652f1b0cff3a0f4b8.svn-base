@@ -1,0 +1,115 @@
+package com.winhands.modules.market.controller;
+
+import java.util.List;
+import java.util.Map;
+
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.winhands.common.utils.PageUtils;
+import com.winhands.common.utils.Query;
+import com.winhands.common.utils.R;
+import com.winhands.common.validator.ValidatorUtils;
+import com.winhands.common.validator.group.AddGroup;
+import com.winhands.modules.market.entity.CalculateEntity;
+import com.winhands.modules.market.entity.TypeEntity;
+import com.winhands.modules.market.service.CalculateService;
+import com.winhands.modules.market.service.TypeService;
+import com.winhands.modules.sys.controller.AbstractController;
+
+
+/**
+ * 计量单位管理
+ * 
+ */
+@RestController
+@RequestMapping("/market/calculate")
+public class CalculateController extends AbstractController {
+	@Autowired
+	private CalculateService calculateService;
+
+	
+	
+	
+	/**
+	 * 所有计量单位列表
+	 */
+
+	@RequestMapping("/list")
+	/*@RequiresPermissions("market:goods:list")*/
+	public R list(@RequestParam Map<String, Object> params){
+		Query query = new Query(params);
+		List<CalculateEntity> calculateList = calculateService.queryList(query);
+		int total = calculateService.queryTotal(query);
+		
+		PageUtils pageUtil = new PageUtils(calculateList, total, query.getLimit(), query.getPage());
+		
+		return R.ok().put("page", pageUtil);
+	}
+
+	
+	
+	
+
+	/**
+	 * 保存计量单位
+	 */
+	
+	@RequestMapping(value="/save", method=RequestMethod.POST)
+	public R save(CalculateEntity calculate){
+		
+		ValidatorUtils.validateEntity(calculate, AddGroup.class);
+	
+		calculateService.save(calculate);
+		
+		
+		return R.ok();
+	}
+	
+	
+	
+	/**
+	 * 修改计量单位
+	 */
+	@ResponseBody
+	@RequestMapping(value="/update" , method=RequestMethod.POST)
+	public R update(CalculateEntity calculate){
+		ValidatorUtils.validateEntity(calculate, AddGroup.class);
+		calculateService.update(calculate);
+		return R.ok();
+	}
+	
+	/**
+	 * 计量单位信息
+	 */
+	@RequestMapping("/info/{id}")
+	public R info(@PathVariable("id")Long id){
+		CalculateEntity calculate = calculateService.queryObject(id);
+	return R.ok().put("calculate", calculate);
+	}
+	
+	
+	
+	
+	/**
+	 * 删除计量单位
+	 */
+	@RequestMapping("/delete")
+	public R delete(@RequestBody Long[] ids){
+		calculateService.deleteBatch(ids);
+		
+		return R.ok();
+	}
+	
+	
+}
+	
+

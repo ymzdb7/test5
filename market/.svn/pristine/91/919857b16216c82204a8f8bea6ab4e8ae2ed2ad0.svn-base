@@ -1,0 +1,137 @@
+var content;
+var curWwwPath=window.document.location.href;
+var pathName=window.document.location.pathname;
+var pos=curWwwPath.indexOf(pathName);
+var localhostPath=curWwwPath.substring(0,pos);
+$(document).ready(function () {
+    $("#jqGrid").jqGrid({
+        url: baseURL + 'market/order/list',
+        datatype: "json",
+        colModel: [			
+			{ label: 'id', name: 'id', width: 30, key: true},
+			{ label: '订单收货人', name: 'orConsignee', width: 50 }, 
+			{ label: '电话', name: 'orderPhone', width: 50 }, 
+			{ label: '下单时间', name: 'orderTime', width: 50 }, 
+			{ label: '订单状态', name: 'orderState', width: 50,formatter:function(value,options,row){
+				if(value==1){
+					
+					return '<span>未付款</span>'
+				}
+				if(value==2){
+					
+					return '<span>已付款待提货</span>'
+				}
+				if(value==3){
+					
+					return '<span>已提货</span>'
+				}
+				
+				
+				if(value==4){
+					
+					return '<span>退货</span>'
+				}
+				if(value==5){
+					
+					return '<span>订单取消</span>'
+				}
+				if(value==6){
+					
+					return '<span>其它</span>'
+				}
+				
+				
+			}}			
+		 ],
+		viewrecords: true,
+        height: 385,
+        rowNum: 10,
+		rowList : [10,30,50],
+        rownumbers: true, 
+        rownumWidth: 25, 
+        autowidth:true,
+        multiselect: true,
+        pager: "#jqGridPager",
+        jsonReader : {
+            root: "page.list",
+            page: "page.currPage",
+            total: "page.totalPage",
+            records: "page.totalCount"
+        },
+        prmNames : {
+            page:"page", 
+            rows:"limit", 
+            order: "order"
+        },
+        gridComplete:function(){
+        	//隐藏grid底部滚动条
+        	$("#jqGrid").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" }); 
+        }
+    });
+ 
+});
+
+
+var vm = new Vue({
+	el:'#rrapp',
+	data:{
+		q:{
+			orderTime: null
+			
+		},
+		showList: true,
+		title:null,
+
+	
+		
+	},
+	methods: {
+		query: function () {
+			vm.reload();
+		},
+		
+	
+	del: function () {
+			var ids = getSelectedRows();
+			if(ids == null){
+				return ;
+			}
+			
+			confirm('确定要删除选中的记录？', function(){
+				$.ajax({
+					type: "POST",
+				    url: baseURL + "market/order/delete",
+                    contentType: "application/json",
+				    data: JSON.stringify(ids),
+				    success: function(r){
+						if(r.code == 0){
+							alert('操作成功', function(){
+                                vm.reload();
+							});
+						}else{
+							alert(r.msg);
+						}
+					}
+				});
+			});
+		},
+		reload: function (event) {
+			vm.showList = true;
+			var page = $("#jqGrid").jqGrid('getGridParam','page');
+			$("#jqGrid").jqGrid('setGridParam',{ 
+				postData:{'orderTime': vm.q.orderTime},
+				
+                page:page
+            }).trigger("reloadGrid");
+			console.log(">>>>贵贵哥"+vm.q.orderTime)
+		}
+		
+	/*	validator: function () {
+		  if(isBlank(vm.goods.goodsName)){
+	                alert("商品名不能为空");
+	                return true;
+	       }
+        }*/
+	}
+});
+

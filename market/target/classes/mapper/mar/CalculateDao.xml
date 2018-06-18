@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.winhands.modules.market.dao.CalculateDao">
+<select id="queryObject" resultType="com.winhands.modules.market.entity.CalculateEntity">
+		select * from tb_calculate where id = #{id}
+	</select>
+	<select id="queryList" resultType="com.winhands.modules.market.entity.CalculateEntity">
+		select * from tb_calculate 
+		<where>
+			<if test="calculateName != null and calculateName.trim() != ''">
+				and `calculate_name` like concat('%',#{calculateName},'%') 
+			</if>
+		</where>
+		order by id desc 
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	<select id="queryTotal" resultType="int">
+		select count(*) from tb_calculate
+	</select>
+	
+		<delete id="deleteBatch">
+		delete from tb_calculate where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		</delete>
+	
+	<insert id="save" parameterType="com.winhands.modules.market.entity.CalculateEntity" >
+		insert into tb_calculate
+		(
+			
+			`calculate_name`
+		)
+		values
+		(
+			#{calculateName}
+		)
+	</insert>
+	
+<update id="update" parameterType="com.winhands.modules.market.entity.CalculateEntity">
+		update tb_calculate 
+		<set> 
+			<if test="calculateName != null">`calculate_name` = #{calculateName}, </if>
+		</set>
+		where id =#{id}
+	</update>
+	
+</mapper>

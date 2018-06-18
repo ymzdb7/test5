@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.winhands.modules.pay.dao.PayDao">
+	
+	<select id="queryObject" parameterType="com.winhands.modules.pay.entity.PayEntity" resultType="com.winhands.modules.pay.entity.PayEntity">
+		select * from t_pay 
+		 <where>
+			<if test="id !=null">
+				and `id` = #{id}
+			</if>
+			<if test="address !=null and address.trim()!=''">
+				and address = #{address}
+			</if>
+			<if test="appId!=null and appId.trim() != '' ">
+				and app_id = #{appId}
+			</if>
+		</where> 
+	</select>
+	
+	<insert id="saveRecord" parameterType="com.winhands.modules.pay.entity.PayRecordEntity" useGeneratedKeys="true" keyProperty="payId">
+	insert into t_pay_record
+			
+		(
+			`order_num`,
+			`pay_order_num`,
+			`order_id`,
+			`prepay_id`,
+			`total_fee`,
+			`username`,
+			`user_id`,
+			`user_ip`,
+			`state`,
+			`create_time`,
+			`mch_id`,
+			`address`
+
+		)
+		values
+		(
+			#{orderNum}, 
+			#{payOrderNum}, 
+			#{orderId}, 
+			#{prepayId}, 
+			#{totalFee}, 
+			#{username}, 
+			#{userId}, 
+			#{userIp},
+			#{state},
+			now(),
+			#{mchId},
+			#{address}
+		)
+	
+	</insert>
+	
+	<select id="queryRecord" parameterType="map" resultType="com.winhands.modules.pay.entity.PayRecordEntity">
+	   select * from t_pay_record 
+	   <where>
+	   	<if test="mchId!=null and mchId.trim()!=''">
+	   		and mch_id=#{mchId}
+	   	</if>
+	   	<if test="payOrderNum!=null and payOrderNum.trim()!=''">
+	   		and pay_order_num = #{payOrderNum}
+	   	</if>
+	   
+	   </where>	
+	</select>
+	
+	<update id="updateRecord">
+		update t_pay_record
+		<set>
+			state=#{state},
+			update_time=now()
+		</set>
+		where pay_id=#{payId}		
+	</update>
+
+</mapper>

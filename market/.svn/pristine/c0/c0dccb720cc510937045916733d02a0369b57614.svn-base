@@ -1,0 +1,30 @@
+package com.winhands.modules.pay.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.winhands.common.utils.R;
+import com.winhands.modules.market.entity.OrderGoodsEntity;
+import com.winhands.modules.pay.service.PayService;
+import com.winhands.modules.sys.controller.AbstractController;
+
+@RestController
+@RequestMapping("/sys/pay")
+public class PayController extends AbstractController{
+	@Autowired
+	private PayService payService;
+	
+	@RequestMapping(value="/ge",method=RequestMethod.POST)
+	public R get(OrderGoodsEntity orderGood){	
+		Map<String, Object> params=new HashMap<String,Object>();
+		params.put("orderId", orderGood.getOrderId());
+		return payService.getPrepayId(params, getUser());
+	}
+}

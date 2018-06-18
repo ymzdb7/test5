@@ -1,0 +1,98 @@
+package com.winhands.modules.market.entity;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
+
+public class OrderEntity implements Serializable{
+
+	/**
+	 * 订单管理
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private Integer id;//订单id
+	private Timestamp orderTime;//订单时间
+	private String orderState;//订单状态1未付款2已付款待提货3已提货4退货5订单取消6其它
+	private String orderPhone;//订单电话
+	private String orConsignee;//订单收货 人
+	private Integer userId;//用户id
+	private String openId;
+	private String address;//属地
+	private String orderNumber;//订单号
+	private BigDecimal allPrice;
+	
+	
+	public BigDecimal getAllPrice() {
+		return allPrice;
+	}
+	public void setAllPrice(BigDecimal allPrice) {
+		this.allPrice = allPrice;
+	}
+	private List<OrderGoodsHeEntity> orderGoodsHeList;
+	
+	
+	public List<OrderGoodsHeEntity> getOrderGoodsHeList() {
+		return orderGoodsHeList;
+	}
+	public void setOrderGoodsHeList(List<OrderGoodsHeEntity> orderGoodsHeList) {
+		this.orderGoodsHeList = orderGoodsHeList;
+	}
+	public String getOrderNumber() {
+		return orderNumber;
+	}
+	public void setOrderNumber(String orderNumber) {
+		this.orderNumber = orderNumber;
+	}
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	
+	public Timestamp getOrderTime() {
+		return orderTime;
+	}
+	public void setOrderTime(Timestamp orderTime) {
+		this.orderTime = orderTime;
+	}
+	public String getOrderState() {
+		return orderState;
+	}
+	public void setOrderState(String orderState) {
+		this.orderState = orderState;
+	}
+	public String getOrderPhone() {
+		return orderPhone;
+	}
+	public void setOrderPhone(String orderPhone) {
+		this.orderPhone = orderPhone;
+	}
+	public String getOrConsignee() {
+		return orConsignee;
+	}
+	public void setOrConsignee(String orConsignee) {
+		this.orConsignee = orConsignee;
+	}
+	public Integer getUserId() {
+		return userId;
+	}
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public String getOpenId() {
+		return openId;
+	}
+	public void setOpenId(String openId) {
+		this.openId = openId;
+	}
+
+}

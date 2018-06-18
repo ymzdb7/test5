@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: market
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: jh
+Implementation-Vendor-Id: com.winhands.bj
+Build-Jdk: 1.8.0_31
+Implementation-URL: http://projects.spring.io/spring-boot/market/
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
+

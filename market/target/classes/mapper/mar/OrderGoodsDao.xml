@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.winhands.modules.market.dao.OrderGoodsDao">
+	<select id="queryObject" resultType="com.winhands.modules.market.entity.OrderGoodsEntity">
+		select * from tb_order_goods where id=#{id}
+		</select>
+		
+		<select id="queryListG" resultType="com.winhands.modules.market.entity.GoodsEntity">
+		select goo.*,orgo.count as count from tb_order_goods orgo LEFT JOIN tb_goods goo on orgo.goods_id=goo.id
+			<where>
+				<if test="id !=null">
+					and  orgo.order_id=#{id}
+				</if>
+			</where>
+		</select>
+	
+		<select id="queryListO" resultType="com.winhands.modules.market.entity.OrderGoodsHeEntity">
+		select  go.`goods_name` as goodsName,orgo.`goods_price` as goodsPrice,orgo.`count` as goodsCount from
+		 tb_order_goods  orgo LEFT JOIN tb_goods go on  orgo.goods_id=go.id
+		where order_id=#{orderId}
+		</select>
+	
+		<select id="queryList" resultType="com.winhands.modules.market.entity.OrderGoodsEntity">
+		select * from tb_order_goods
+		<where>
+			<if test="orderId != null">
+				and `order_id` =#{orderId}
+			</if>
+		</where>
+	
+	</select>
+	
+	
+	<insert id="save" parameterType="com.winhands.modules.market.entity.OrderGoodsEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_order_goods
+		(
+			
+			`goods_id`, 
+			`order_id`,
+			`count`,
+			`goods_price`
+			)
+		values
+		(
+			#{goodsId}, 
+			#{orderId},
+			#{count},
+			#{goodsPrice}
+		)
+	</insert>
+	
+		
+	<delete id="delete">
+		delete from tb_order_goods where order_id =#{id}
+	</delete>
+	
+	
+</mapper>

@@ -1,0 +1,89 @@
+package com.winhands.modules.pay.service.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.winhands.common.utils.HttpUtils;
+import com.winhands.common.utils.R;
+import com.winhands.common.utils.WXPayConstants.SignType;
+import com.winhands.common.utils.WXPayUtil;
+import com.winhands.modules.market.dao.OrderDao;
+import com.winhands.modules.market.dao.OrderGoodsDao;
+import com.winhands.modules.market.entity.OrderEntity;
+import com.winhands.modules.market.entity.OrderGoodsHeEntity;
+import com.winhands.modules.pay.service.PayService;
+import com.winhands.modules.sys.entity.SysUserEntity;
+
+@Service
+public class PayServiceImpl implements PayService {
+
+	@Autowired
+	private OrderDao orderDao;
+	
+	@Autowired
+	private OrderGoodsDao orderGoodsDao;
+	
+	@Override
+	public R getPrepayId(Map<String, Object> map,SysUserEntity user) {
+		try {	// TODO Auto-generated method stub
+		Long orderId=new Long(map.get("orderId").toString());
+		System.out.println(orderId);
+		OrderEntity order=orderDao.queryObjectW(orderId);
+		List<OrderGoodsHeEntity> list=orderGoodsDao.queryListO(map);
+		Double totalPrice=0.00;
+		for(OrderGoodsHeEntity entity:list) {
+			totalPrice=totalPrice+entity.getTotalPrice().doubleValue();
+		}
+		totalPrice=totalPrice*100;
+		
+		//此处要验证用户		
+		String mch_id="1423233502";
+		String appid="wx14c48344e62f970a";
+		String key="57799b42d7ee43618fd19b1aa3125c33";
+		String ip="123.12.12.123";
+		String notify_url="http://test.letiantian.com/wxpay/notify";
+		String nonce_str=System.currentTimeMillis()+"";
+		Map<String,String> xmlMap=new HashMap<String,String>();
+		//标题名称
+		xmlMap.put("body", user.getAddress()+"市场-商品");
+		//支付类型
+		xmlMap.put("trade_type", "NATIVE");
+		//商户号
+		xmlMap.put("mch_id", mch_id);
+		//商户ID
+		xmlMap.put("appid", appid);
+		//签名类型
+		xmlMap.put("sign_type", "MD5");
+		//随机数
+		xmlMap.put("nonce_str", nonce_str);
+		//详细信息
+		xmlMap.put("detail", "");
+		//类别
+		xmlMap.put("device_info", "WEB");
+		//订单号
+		xmlMap.put("out_trade_no", nonce_str+order.getOrderNumber());
+		//支付类型
+		xmlMap.put("fee_type", "CNY");
+		//支付金额
+		xmlMap.put("total_fee", totalPrice.intValue()+"");
+		//支付地址ip
+		xmlMap.put("spbill_create_ip",ip );
+		//回掉地址
+		xmlMap.put("notify_url", notify_url);		
+		
+			String xml=WXPayUtil.generateSignedXml(xmlMap, key, SignType.MD5);
+			HttpUtils h=  new HttpUtils();
+			xmlMap=h.pay(xml);
+			return R.ok().put("result", xmlMap);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		return R.error("支付调用失败！");
+	}
+	
+}

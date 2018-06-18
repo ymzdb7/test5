@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.winhands.modules.market.dao.OrderDao">
+	
+	<select id="queryObject" resultType="com.winhands.modules.market.entity.OrderEntity">
+		select * from tb_order
+		<where>
+			<if test="id !=null">
+			and `id` = #{id}
+			</if>
+			<if test="userId !=null">
+			and user_id = #{userId}
+			</if>
+		</where>
+	</select>
+		
+			
+	<select id="queryObjectMa" resultType="com.winhands.modules.market.entity.OrderEntity">
+		select * from tb_order
+		<where>
+		<if test="id !=null">
+		and `id` = #{id}
+		</if>
+		</where>
+		
+		</select>
+	
+	
+	<select id="queryObjectW" resultType="com.winhands.modules.market.entity.OrderEntity">
+		select * from tb_order where id = #{id}
+	</select>
+	
+	<select id="queryList" resultType="com.winhands.modules.market.entity.OrderEntity">
+		SELECT * from  tb_order
+		<where>
+		<!-- <if test="address != null and address.trim() != ''">
+				and `address` like concat('%',#{address},'%') 
+			</if> -->
+			<if test="address != null and address.trim() != ''">
+				and `address` =#{address}
+			</if>
+			<if test="orderState != null and orderState.trim() != ''">
+				and `order_state` like concat('%',#{orderState},'%') 
+			</if>
+			
+		<if test="userId != null">
+				and `user_id`=#{userId}
+			</if>	
+			
+			
+		</where>
+			<where>
+		<if test="id != null">
+				and `id`=#{id} 
+			</if>
+		</where>
+		
+		order by id 
+		desc 
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+<!-- 查询最新产生的订单 -->
+	<select id="queryNew" resultType="com.winhands.modules.market.entity.OrderEntity">
+	SELECT * from tb_order ORDER BY id desc LIMIT 1
+	</select>
+
+	
+	
+	<!-- <select id="queryTotal" resultType="int">
+		select count(*)  FROM `tb_order_goods` og
+		LEFT JOIN tb_order ord ON ord.id = og.order_id
+			<where>
+		<if test="address != null and address.trim() != ''">
+			and ord.`address` like concat('%',#{address},'%') 
+		</if>
+		</where>
+	</select> -->
+	
+	<select id="queryTotal" resultType="int">
+		select count(*)  FROM  tb_order 
+			<where>
+		<if test="orderState != null and orderState.trim() != ''">
+			and `order_state` like concat('%',#{orderState},'%') 
+		</if>
+		<if test="address != null and address.trim() != ''">
+			and `address`=#{address}
+		</if>
+		</where>
+	</select>
+	
+	
+	
+	
+	
+	<delete id="deleteBatch">
+		delete from tb_order where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	
+		
+	<delete id="delete">
+		delete from tb_order where id =#{id}
+	</delete>
+	
+	
+	
+	<insert id="save" parameterType="com.winhands.modules.market.entity.OrderEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_order
+		(
+			
+			`order_time`, 
+			`order_state`,
+			`order_phone`, 
+			`or_consignee`,
+			`user_id`,
+			`address`,
+			`order_number`
+		)
+		values
+		(
+			#{orderTime}, 
+			#{orderState},
+			#{orderPhone}, 
+			#{orConsignee},
+			#{userId},
+			#{address},
+			#{orderNumber}
+		)
+	</insert>
+	
+	<update id="update">
+		update tb_order 
+		<set> 
+			<if test="orderState != null">`order_state` = #{orderState}, </if>
+
+		</set>
+		where id=#{id}
+	
+	</update>
+	
+	<select id="getObject" resultType="java.util.HashMap">
+	SELECT 
+		ord.`or_consignee` AS orConsignee,
+		ord.`order_phone` AS orderPhone,
+		 ord.`order_time` AS orderTime,
+		ord.`order_state` AS orderState,
+		go.`goods_name` AS goodsName,
+	 go.`goods_price` AS goodsPrice,
+		go.`goods_introduce` AS goodsIntroduce,
+		go.`goods_sale_starttime` AS goodsSaleStarttime,
+		go.`goods_sale_endtime` AS goodsSaleEndtime,
+		go.`address` AS address,
+		go.`type_id` AS typeId,
+		og.`count` AS count,
+		go.`counts` AS counts
+		
+		<!--	go.`address` AS address,
+		og.`count` -->
+	FROM `tb_order_goods` og
+		LEFT JOIN tb_order ord ON ord.id = og.order_id
+		LEFT JOIN tb_goods go ON go.id = og.goods_id
+	WHERE og.id = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,56 @@
+package com.winhands.modules.market.entity;
+
+import java.io.Serializable;
+import java.util.Date;
+
+public class OrderEntity implements Serializable{
+
+	/**
+	 * 订单管理
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private Integer id;//订单id
+	private Date orderTime;//订单时间
+	private String orderState;//订单状态1未付款2已付款待提货3已提货4退货5订单取消6其它
+	private String orderPhone;//订单电话
+	private String orConsignee;//订单收货 人
+	private Integer userId;//用户id
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public Date getOrderTime() {
+		return orderTime;
+	}
+	public void setOrderTime(Date orderTime) {
+		this.orderTime = orderTime;
+	}
+	public String getOrderState() {
+		return orderState;
+	}
+	public void setOrderState(String orderState) {
+		this.orderState = orderState;
+	}
+	public String getOrderPhone() {
+		return orderPhone;
+	}
+	public void setOrderPhone(String orderPhone) {
+		this.orderPhone = orderPhone;
+	}
+	public String getOrConsignee() {
+		return orConsignee;
+	}
+	public void setOrConsignee(String orConsignee) {
+		this.orConsignee = orConsignee;
+	}
+	public Integer getUserId() {
+		return userId;
+	}
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
+
+}

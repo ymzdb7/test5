@@ -1,0 +1,392 @@
+package com.winhands.modules.market.controller;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.winhands.common.annotation.SysLog;
+import com.winhands.common.utils.PageUtils;
+import com.winhands.common.utils.Query;
+import com.winhands.common.utils.R;
+import com.winhands.common.validator.ValidatorUtils;
+import com.winhands.common.validator.group.AddGroup;
+import com.winhands.modules.market.entity.GoodsEntity;
+import com.winhands.modules.market.entity.OrderEntity;
+import com.winhands.modules.market.entity.OrderGoodsEntity;
+import com.winhands.modules.market.entity.OrderGoodsHeEntity;
+import com.winhands.modules.market.service.GoodsService;
+import com.winhands.modules.market.service.OrderGoodsService;
+import com.winhands.modules.market.service.OrderService;
+import com.winhands.modules.sys.controller.AbstractController;
+
+/**
+ * 订单管理
+ * 
+ */
+@RestController
+@RequestMapping("/market/order")
+public class OrderController extends AbstractController {
+	@Autowired
+	private OrderService orderService;
+	@Autowired
+	private OrderGoodsService orderGoodsService;
+	@Autowired
+	private GoodsService goodsService;
+	
+	
+	
+	/**
+	 * 所有订单列表
+	 */
+	@ResponseBody
+	@RequestMapping("/list")
+	/*@RequiresPermissions("market:goods:list")*/
+	public R list(@RequestParam Map<String, Object> params){
+		//查询列表数据
+	
+		String orderState=(String)params.get("orderState");
+		if(orderState!=null&&!orderState.equals("")&&orderState.trim().equals("未付款")) {
+			params.put("orderState", "1");
+		}else if(orderState!=null&&!orderState.equals("")&&orderState.trim().equals("已付款")) {
+			params.put("orderState", "2");
+		}else if(orderState!=null&&!orderState.equals("")&&orderState.trim().equals("已提货")) {
+			params.put("orderState", "3");
+		}else if(orderState!=null&&!orderState.equals("")&&orderState.trim().equals("订单取消")){
+			params.put("orderState", "4");
+		}else {
+			/*params.put("orderState", "");*/
+		}
+		if(getUser().getAddress()!=null&&!getUser().getAddress().trim().equals("")){
+		params.put("address", getUser().getAddress().trim());
+		}
+		Query query = new Query(params);
+		List<OrderEntity> orderList = orderService.queryList(query);
+		int total = orderService.queryTotal(query);
+		
+		PageUtils pageUtil = new PageUtils(orderList, total, query.getLimit(), query.getPage());
+		
+		return R.ok().put("page", pageUtil);
+	}
+	
+	/**
+	 *订单详情
+	 */
+	@ResponseBody
+	@RequestMapping("/detail")
+	public R detail(Long id){	
+		//查询订单信息和商品信息，近回到前台展示
+/*		Map<String,Object> map1=new HashMap<String,Object>();*/
+ 		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("id", new Long(id).intValue());
+				OrderEntity order=orderService.queryObjectMa(map);
+				List<GoodsEntity> goods=orderGoodsService.queryListG(map);
+			/*	map1.put("order", order);
+				map1.put("goods", goods);*/
+		/*	Map<String,Object> map=orderService.getObject(new Long(id).intValue());	*/
+		return R.ok().put("goods", goods).put("order", order);
+	}
+	
+	
+	/**
+	 * 商品信息
+	 */
+	@RequestMapping("/info/{id}")
+	/*@RequiresPermissions("sys:user:info")*/
+	public R info(@PathVariable("id")String id){
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("id", Long.parseLong(id));
+		OrderEntity order=orderService.queryObjectMa(map);
+		return R.ok().put("order", order);
+	}
+	
+	
+	
+	
+	
+	
+	/**
+	 * 获取订单状态
+	 */
+	@RequestMapping("/orderState1/{id}")
+	/*@RequiresPermissions("sys:user:info")*/
+	public R orderState1(@PathVariable("id")String id){
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("id", Long.parseLong(id));
+		OrderEntity order=orderService.queryObjectMa(map);
+		return R.ok().put("order11", order);
+			
+	
+	}
+	
+	
+	
+	
+	/**
+	 * 修改订单状态为已提货
+	 */
+	@RequestMapping("/updateState1/{id}")
+	/*@RequiresPermissions("sys:user:info")*/
+	public R updateState1(@PathVariable("id")String id){
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("id", Long.parseLong(id));
+		OrderEntity order=orderService.queryObjectMa(map);
+		
+		if(order.getOrderState().equals("1")||order.getOrderState().equals("2")) {
+				order.setOrderState("3");
+				orderService.update(order);
+					return R.ok();
+				}else {
+					return R.error("只可对订单状态未付款、已付款进行操作!");
+					}
+	
+	}
+	
+	/**
+	 * 修改订单状态为订单取消，并且回退下单数量到库存数量
+	 */
+	@RequestMapping("/updateState2/{id}")
+	public R updateState2(@PathVariable("id")String id) {
+				
+		//查询订单实体
+				Map<String,Object> map1=new HashMap<String,Object>();
+				map1.put("id", Long.parseLong(id));
+				OrderEntity order=orderService.queryObjectMa(map1);
+				if(order.getOrderState().equals("1")||order.getOrderState().equals("2")) {//只有当订单状态为未付款时才可进行订单取消操作，此处作判断
+							order.setOrderState("4");
+					
+							//回退数量
+						try {
+							Map<String, Object> map=new HashMap<String,Object>();
+							map.put("orderId",id);
+							List<OrderGoodsEntity> orderGoods=orderGoodsService.queryList(map); 
+							for (int i = 0; i < orderGoods.size(); i++) {
+							long idd=(long)orderGoods.get(i).getGoodsId();
+								GoodsEntity goods=goodsService.queryObject(idd);
+								//回退数量
+							int cc=orderGoods.get(i).getCount()+goods.getCounts();
+							goods.setCounts(cc);
+							goodsService.updateO(goods);
+						
+							}
+							orderService.update(order);
+				
+						} catch (Exception e) {
+							// TODO: handle exception
+							return R.error("订单取消失败！");
+						}
+		
+		                    return R.ok("订单取消成功！");
+					}else {
+						return R.error("只可对订单状态未付款进行操作!");
+					}
+		
+		
+		
+		
+		
+
+	
+		
+
+		
+	}
+	
+	
+	
+	
+	
+	
+	/**
+	 * 修改订单状态
+	 */
+	@ResponseBody
+	@RequestMapping(value="/update" , method=RequestMethod.POST)
+	public R update(OrderEntity orderO){
+		ValidatorUtils.validateEntity(orderO, AddGroup.class);
+		orderService.update(orderO);
+		return R.ok();
+	}
+	
+	
+	
+	
+	
+	/**
+	 * 删除订单
+	 */
+	@SysLog("删除商品")
+	@RequestMapping("/delete")
+	public R delete(@RequestBody Long[] ids){
+		orderService.deleteBatch(ids);
+		
+		return R.ok();
+	}
+	
+	
+	
+	
+	/**
+	 * 客户端获取多个订单接口,暂时不用
+	 */
+/*	
+	@RequestMapping(value="/orderManyList" , method = RequestMethod.POST)
+	public R orderManyList(Long userId){
+		Map<String,Object> map=new HashMap<String,Object>();
+		map.put("userId", userId);
+		List<OrderEntity> orderList=orderService.queryList(map);
+		return R.ok().put("orderList", orderList);
+	}	*/
+	
+	
+	/**
+	 * 客户端获取订单详情列表
+	 */
+	@RequestMapping(value="/orderGoodsList" , method = RequestMethod.POST)
+	public R orderGoodsList(){
+		Map<String, Object> oGmap=new HashMap<String,Object>();
+		List<OrderEntity> list=new ArrayList<OrderEntity>();
+		Map<String, Object> map=new HashMap<String,Object>();
+		Map<String, Object> map1=new HashMap<String,Object>();//新增的
+		map1.put("userId", getUser().getUserId());
+	
+		List<OrderEntity> orderList=orderService.queryList(map1);
+		if(orderList!=null&&orderList.size()!=0) {
+			for (int i = 0; i < orderList.size(); i++) {
+				BigDecimal allPrice = new BigDecimal(0);  
+				map.put("orderId", orderList.get(i).getId());	
+				List<OrderGoodsHeEntity> orderGoodsHe=orderGoodsService.queryListO(map); 
+					if(orderGoodsHe!=null&&orderGoodsHe.size()!=0) {
+						for (int j = 0; j < orderGoodsHe.size(); j++) {
+						if(orderGoodsHe.get(j).getTotalPrice()!=null) {
+							allPrice=allPrice.add(orderGoodsHe.get(j).getTotalPrice());
+						}
+						
+						}
+						
+					orderList.get(i).setOrderGoodsHeList(orderGoodsHe);
+						list.add(orderList.get(i));
+					}
+					orderList.get(i).setAllPrice(allPrice);
+				}
+			}
+	
+		oGmap.put("list", list);
+		return R.ok().put("oGmap", oGmap);
+	}	
+	
+	
+	/**
+	 * 客户端获取收货状态(改状态)
+	 */
+	@RequestMapping(value="/orderYes" , method = RequestMethod.POST)
+	public R orderYes(){
+	
+			OrderEntity order=orderService.queryObject(getUser().getUserId());
+			order.setOrderState("3");
+			orderService.update(order);
+		
+		return R.ok("已收货！");
+	}	
+	
+	/**
+	 * 客户端取消订单(回退数量)
+	 */
+	@RequestMapping(value="/orderNo" , method = RequestMethod.POST)
+	public R orderNo(String id){
+		Long id1=Long.valueOf(id);
+		try {
+			Map<String, Object> map=new HashMap<String,Object>();
+			map.put("orderId",id);
+			
+			List<OrderGoodsEntity> orderGoods=orderGoodsService.queryList(map); 
+			for (int i = 0; i < orderGoods.size(); i++) {
+			long idd=(long)orderGoods.get(i).getGoodsId();
+				GoodsEntity goods=goodsService.queryObject(idd);
+				//回退数量
+			int cc=orderGoods.get(i).getCount()+goods.getCounts();
+			goods.setCounts(cc);
+			goodsService.updateO(goods);
+			orderService.delete(id1);
+			orderGoodsService.delete(id1);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			return R.ok("取消订单失败！");
+		}
+		
+		return R.ok("取消订单成功！");
+	}	
+
+	
+	/**
+	 * 客户端获取所有订单接口，用于客户端在手机端操作
+	 */
+	
+	@RequestMapping(value="/orGoodsListApp" , method = RequestMethod.POST)
+	public R orGoodsListApp(){
+	
+		if(getUser().getUserType()==3) {
+			Map<String, Object> oGmap=new HashMap<String,Object>();
+		List<OrderEntity> list=new ArrayList<OrderEntity>();
+		Map<String, Object> map=new HashMap<String,Object>();
+		Map<String, Object> map1=new HashMap<String,Object>();//新增的
+		map1.put("address", getUser().getAddress().trim());
+		List<OrderEntity> orderList=orderService.queryList(map1);
+		if(orderList!=null&&orderList.size()!=0) {
+			for (int i = 0; i < orderList.size(); i++) {
+				BigDecimal allPrice = new BigDecimal(0);  
+				map.put("orderId", orderList.get(i).getId());	
+				List<OrderGoodsHeEntity> orderGoodsHe=orderGoodsService.queryListO(map); 
+					if(orderGoodsHe!=null&&orderGoodsHe.size()!=0) {
+						for (int j = 0; j < orderGoodsHe.size(); j++) {
+						if(orderGoodsHe.get(j).getTotalPrice()!=null) {
+							allPrice=allPrice.add(orderGoodsHe.get(j).getTotalPrice());
+						}
+						
+						}
+						
+					orderList.get(i).setOrderGoodsHeList(orderGoodsHe);
+						list.add(orderList.get(i));
+					}
+					orderList.get(i).setAllPrice(allPrice);
+				}
+			}
+		
+		oGmap.put("list", list);
+		return R.ok().put("orderMap", oGmap);
+		}else {
+			return R.error("您没有权限查看！");
+		}
+		
+	}	
+	
+	
+	/**
+	 * 确认提货操作
+	 */	
+	@RequestMapping(value="/orderOk" , method = RequestMethod.POST)
+	public R orderOk(String orderId){
+			try {
+				OrderEntity order=orderService.queryObject(Long.valueOf(orderId));
+				order.setOrderState("3");
+				orderService.update(order);
+			} catch (Exception e) {
+				return R.error("操作失败！");
+			}
+		return R.ok("已提货！");
+	}	
+	
+	
+}

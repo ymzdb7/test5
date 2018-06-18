@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.winhands.modules.market.dao.GoodsDao">
+	
+	<select id="queryObject" resultType="com.winhands.modules.market.entity.GoodsEntity">
+		select  
+		tbg.`id` as id,
+		tbg.`goods_name` as goodsName,
+		tbg.`goods_price` as goodsPrice,
+		tbg.`goods_introduce` as goodsIntroduce,
+		tbg.`goods_sale_starttime` as goodsSaleStarttime,
+		tbg.`goods_sale_endtime` as goodsSaleEndtime,
+		tbg.`goods_pic_name` as goodsPicName,
+		tbg.`goods_pic_path` as goodsPicPath,
+		tbg.`goods_status` as goodsStatus,
+		tbg.`goods_url` as goodsUrl,
+		tbg.`user_id` as userId,
+		tbg.`address` as address,
+		tbg.`type_id` as typeId,
+		tbg.`counts` as counts,
+		tbg.`calculate_name` as calculateName,
+		tbg.`price_counts` as priceCounts,
+		tbt.`type_name` as typeName
+	 		from
+		 tb_goods  tbg LEFT JOIN tb_type  tbt  on  tbg.type_id=tbt.type_id
+		where tbg.id = #{id}
+	</select>
+	
+	
+	
+	
+	<select id="queryList" resultType="com.winhands.modules.market.entity.GoodsEntity">
+		select tbg.*, tbt.type_name as typeName from tb_goods tbg left join tb_type tbt on tbg.type_id=tbt.type_id
+		
+		<where>
+			<if test="goodsName != null and goodsName.trim() != ''">
+				and tbg.`goods_name` like concat('%',#{goodsName},'%') 
+			</if>
+			<if test="address != null and address.trim() != ''">
+				and  tbg.address = #{address}
+			</if>
+			<if test="typeId != null">
+				and   tbg.type_id = #{typeId}
+			</if>
+			<if test="goodsStatus != null and goodsStatus.trim() != ''">
+				and   tbg.goods_status = #{goodsStatus}
+			</if>
+				
+		
+			<if test="deleteState != null  and deleteState.trim() != ''">
+				and   tbg.delete_state = #{deleteState}
+			</if>
+			
+			
+		</where>
+		
+		order by tbg.id 
+		desc 
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+	
+	
+	
+	<select id="queryTotal" resultType="int">
+		select count(*) from tb_goods  
+		<where>
+			<if test="deleteState != null  and deleteState.trim() != ''">
+				and  `delete_state` = #{deleteState}
+			</if>
+				<if test="address != null  and address.trim() != ''">
+				and  `address` = #{address}
+			</if>
+		</where>
+	</select>
+	
+	
+	
+	
+	
+	<insert id="save" parameterType="com.winhands.modules.market.entity.GoodsEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into tb_goods
+		(
+			
+			`goods_name`, 
+			`goods_price`,
+			`goods_introduce`,
+			`goods_pic_name`, 
+			`goods_pic_path`, 
+			`goods_status`, 
+			`goods_sale_starttime`,
+			`goods_sale_endtime`,
+			`goods_url`,
+			`user_id`,
+			`address`,
+			`type_id`,
+			`calculate_name`,
+			`price_counts`,
+			`counts`
+			
+			
+			
+			
+		)
+		values
+		(
+			#{goodsName}, 
+			#{goodsPrice},
+			#{goodsIntroduce},
+			#{goodsPicName}, 
+			#{goodsPicPath}, 
+			#{goodsStatus}, 
+			#{goodsSaleStarttime},
+			#{goodsSaleEndtime},
+			#{goodsUrl},
+			#{userId},
+			#{address},
+			#{typeId},
+			#{calculateName},
+			#{priceCounts},
+			#{counts}
+			
+		)
+	</insert>
+	
+		<update id="updateBatch">
+			update tb_goods set `delete_state` = '1' where id in 
+				<foreach item="id" collection="array" open="(" separator="," close=")">
+					#{id}
+				</foreach>
+		</update>
+	
+	
+	
+	<delete id="deleteBatch">
+		delete from tb_goods where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	
+	
+	
+	
+		<update id="update" parameterType="com.winhands.modules.market.entity.GoodsEntity">
+		update tb_goods 
+		<set> 
+			<if test="goodsName != null">`goods_name` = #{goodsName}, </if>
+			<if test="goodsPrice != null">`goods_price` = #{goodsPrice}, </if>
+			<if test="goodsIntroduce != null">`goods_introduce` = #{goodsIntroduce}, </if>
+			
+			<if test="goodsSaleStarttime != null">`goods_sale_starttime` = #{goodsSaleStarttime}, </if>
+			<if test="goodsSaleEndtime != null">`goods_sale_endtime` = #{goodsSaleEndtime}, </if>
+			
+			<if test="goodsPicPath != null">`goods_pic_path` = #{goodsPicPath}, </if>
+			<if test="goodsPicName != null">`goods_pic_name` = #{goodsPicName}, </if>
+			<if test="goodsStatus != null">`goods_status` = #{goodsStatus}, </if>
+			<if test="goodsUrl != null">`goods_url` = #{goodsUrl}, </if>
+				<if test="userId != null">`user_id` = #{userId}, </if>
+				<if test="calculateName != null">`calculate_name` = #{calculateName}, </if>
+			<if test="address != null">`address` = #{address}, </if>
+				<if test="typeId != null">`type_id` = #{typeId}, </if>
+				<if test="counts != null">`counts` = #{counts}, </if>
+				<if test="priceCounts != null">`price_counts` = #{priceCounts}, </if>
+			
+		</set>
+		where id = #{id} 
+	</update>
+	
+	<update id="updateO" parameterType="com.winhands.modules.market.entity.GoodsEntity">
+		update tb_goods 
+		<set> 
+			<if test="counts != null">`counts` = #{counts}, </if>
+		</set>
+	where id = #{id} 
+	</update>
+	
+	
+	
+
+</mapper>
